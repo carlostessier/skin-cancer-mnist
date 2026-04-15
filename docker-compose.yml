@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  jupyter:
+    build: .
+    container_name: skin-cancer-classifier
+    ports:
+      - "8888:8888"
+    volumes:
+      # Notebooks persist on host
+      - ./notebooks:/workspace/notebooks
+      # Dataset folder (download HAM10000 here)
+      - ./data:/workspace/data
+      # Kaggle credentials (optional, for auto-download)
+      - ~/.kaggle:/root/.kaggle:ro
+    environment:
+      - TF_CPP_MIN_LOG_LEVEL=3          # Suppress TF/CUDA init noise
+      - TF_FORCE_GPU_ALLOW_GROWTH=true  # Allocate GPU memory on demand (no OOM)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            # NVIDIA GPU — requires nvidia-container-toolkit on the host
+            # If no GPU is present, remove this 'devices' block to run on CPU
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+        limits:
+          memory: 8G
+    restart: unless-stopped

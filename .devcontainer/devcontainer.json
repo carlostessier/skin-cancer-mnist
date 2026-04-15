@@ -1,0 +1,88 @@
+{
+  "name": "Skin Cancer Classifier — AI & Big Data",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  // Map the project root into the container
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  // Forward Jupyter port so it opens in the browser automatically
+  "forwardPorts": [8888],
+  "portsAttributes": {
+    "8888": {
+      "label": "Jupyter Notebook",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  // Register ipykernel so VS Code can find it, then start Jupyter
+  "postCreateCommand": "python -m ipykernel install --user --name python3 --display-name 'Python 3 (TF 2.15)'",
+  "postStartCommand": "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --notebook-dir=/workspace &",
+
+  // VS Code extensions installed automatically inside the container
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Python & Jupyter core
+        "ms-python.python",
+        "ms-python.pylance",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        // Code quality
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        // Data & CSV preview
+        "mechatroner.rainbow-csv",
+        "GrapeCity.gc-excelviewer",
+        // Image preview
+        "kisstkondoros.vscode-gutter-preview",
+        // Git helpers
+        "eamodio.gitlens",
+        // Docker (useful for students to inspect the container)
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        // Python interpreter inside the container
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        // Jupyter: use the running server started by postStartCommand
+        "jupyter.jupyterServerType": "local",
+        "jupyter.notebookFileRoot": "/workspace/notebooks",
+        // Format on save
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter"
+        },
+        // Display inline plots inside VS Code notebooks
+        "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+        // Terminal starts at project root
+        "terminal.integrated.cwd": "/workspace"
+      }
+    }
+  },
+
+  // Mount Kaggle credentials from host (needed for dataset download)
+  "mounts": [
+    "source=${localEnv:USERPROFILE}${localEnv:HOME}/.kaggle,target=/root/.kaggle,type=bind,readonly"
+  ],
+
+  // Run as the non-root vscode user
+  "remoteUser": "vscode",
+
+  // GPU support — VS Code passes --gpus=all if NVIDIA GPU is detected,
+  // falls back to CPU automatically if no GPU is present
+  "hostRequirements": {
+    "gpu": "optional"
+  },
+
+  // Environment variables visible inside the container
+  "remoteEnv": {
+    "TF_CPP_MIN_LOG_LEVEL": "3",
+    "TF_FORCE_GPU_ALLOW_GROWTH": "true",
+    "PYTHONPATH": "/workspace"
+  }
+}

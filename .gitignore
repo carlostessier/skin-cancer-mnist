@@ -2,3 +2,12 @@
 *.zip
 data/HAM10000_images_part_1/
 data/HAM10000_images_part_2/
+
+# Python env
+.venv/
+__pycache__/
+*.pyc
+
+# IDE / local
+.vscode/
+.claude/
