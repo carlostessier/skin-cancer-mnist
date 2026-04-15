@@ -1,0 +1,4 @@
+# Large data files
+*.zip
+data/HAM10000_images_part_1/
+data/HAM10000_images_part_2/
